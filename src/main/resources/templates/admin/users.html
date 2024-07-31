@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<h2>Admin panel</h2>
+<h3><a href="/admin/newUser">Add new users</a></h3>
+<h4>All users</h4>
+<div th:each="user : ${users}">
+    <a th:href="@{/admin/editUser(id=${user.getId()})}"
+       th:text="${user.getId()+' '+ user.getName()+' '+user.getSurname()+' '+user.getAge()+' '+ user.getEmail() +' '+ user.getRoles()}"User</a>
+</div>
+<h3><a href="/logout"> Logout</a></h3>
+</body>
+</html>
