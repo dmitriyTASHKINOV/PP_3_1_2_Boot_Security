@@ -10,6 +10,7 @@ import ru.kata.spring.boot_security.demo.dao.UserRepository;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,13 +69,23 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(User user, Set<String> roles) {
-        if (roles == null) {
-            user.setRoles(roleRepository.findAllByName("USER"));
+        if (roles == null||roles.isEmpty()) {
+            user.setRoles(new HashSet<>());
         } else {
             user.setRoles(roleRepository.findAllByNameIn(roles));
         }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+
+        User existingUser = userRepository.findById(user.getId()).orElse(null);
+
+        if (existingUser != null) {
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                user.setPassword(existingUser.getPassword()); // Используем существующий хеш пароля
+            } else {
+                user.setPassword(passwordEncoder.encode(user.getPassword())); // Хешируем новый пароль
+            }
+
+            userRepository.save(user);
+        }
     }
 
     @Override
