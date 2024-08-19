@@ -69,22 +69,26 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void saveUser(User user, Set<String> roles) {
-        if (roles == null||roles.isEmpty()) {
+        if (roles == null || roles.isEmpty()) {
             user.setRoles(new HashSet<>());
         } else {
             user.setRoles(roleRepository.findAllByNameIn(roles));
         }
 
-        User existingUser = userRepository.findById(user.getId()).orElse(null);
-
-        if (existingUser != null) {
-            if (user.getPassword() == null || user.getPassword().isEmpty()) {
-                user.setPassword(existingUser.getPassword()); // Используем существующий хеш пароля
-            } else {
-                user.setPassword(passwordEncoder.encode(user.getPassword())); // Хешируем новый пароль
-            }
-
+        if (user.getId() == null) {
+            user.setPassword(passwordEncoder.encode(user.getPassword())); // Хешируем пароль
             userRepository.save(user);
+        } else {
+
+            User existingUser = userRepository.findById(user.getId()).orElse(null);
+            if (existingUser != null) {
+                if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                    user.setPassword(existingUser.getPassword());
+                } else {
+                    user.setPassword(passwordEncoder.encode(user.getPassword())); // Хешируем новый пароль
+                }
+                userRepository.save(user);
+            }
         }
     }
 
